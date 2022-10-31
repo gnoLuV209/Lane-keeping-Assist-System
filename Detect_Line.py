@@ -38,9 +38,9 @@ def Tao_Toa_Do(image, line_parameters):
         x2 = int((y2-intercept)/slope)
     except:
         y1 = 0
-        y2 =0
-        x1 =0
-        x2 =0
+        y2 = 0
+        x1 = 0
+        x2 = 0
     return np.array([x1,y1,x2,y2])
 #################################################################################################################
 def Hien_Thi_Doan_Thang(image,average_lines):
@@ -64,71 +64,67 @@ def Giao_Diem(average_lines,fixed_line):
         Trung_Diem = int((Hoanh_Do_Giao_Diem_Trai + Hoanh_Do_Giao_Diem_Phai)/2)
         return np.array([Trung_Diem, Hoanh_Do_Giao_Diem_Trai, Hoanh_Do_Giao_Diem_Phai])
 #################################################################################################################
-def Gioi_Han_Khu_Vuc(canny_image, Hoanh_Do_Giao_Diem_Trai, Hoanh_Do_Giao_Diem_Phai ):
+def Gioi_Han_Khu_Vuc(canny_image, Trung_Diem ):
     height = canny_image.shape[0]
-    if Hoanh_Do_Giao_Diem_Trai == 0:
+    if Trung_Diem == 0:
         triangle = np.array([ 
-        [(100,height) , (1250,height) , (400,500)]
+        [(50,height) , (1250,height) , (700,500), (1000,500)]
         ])
-    elif Hoanh_Do_Giao_Diem_Phai == 0:
+    else :
         triangle = np.array([ 
-        [(50,height) , (1250,height) , (900,500)]
-        ])
-    else:
-        triangle = np.array([ 
-        [(100,height) , (1200,height) , (600,500)]
+        [(100,height) , (1200,height) , (600,450)]
         ])
     return triangle
 #################################################################################################################
-def Tao_Mat_Na(canny_image,left_point,right_point):
-    triangle = Gioi_Han_Khu_Vuc(canny_image,left_point,right_point)
+def Tao_Mat_Na(canny_image,mid_point):
+    triangle = Gioi_Han_Khu_Vuc(canny_image,mid_point)
     mask = np.zeros_like(canny_image)
     cv2.fillPoly(mask, triangle, 255)
     masked_image = cv2.bitwise_and(canny_image, mask)
     return masked_image
 #################################################################################################################
 def Dieu_Khien(mid_point, left_point, right_point):
-    if 400 < mid_point < 750 and left_point>300 :
+    if (500 < mid_point < 950 and left_point > 370 and right_point < 1200) :
         print('Di Thang')
-        #arduino.write(b'90')
-        sleep(0.1)
-    elif 200< left_point <300:
-        print('Re Phai',right_point)
-        #arduino.write(b'45')
-        sleep(0.1)
-    else:
-        print('Re Trai')
+        arduino.write(b'90')
+        sleep(0.001)
+    elif 160 < left_point < 330:
+        print('Re Phai',left_point)
+        arduino.write(b'45')
+        sleep(0.001)
+    #else:
+        #print('Re Trai')
         #arduino.write(b'135')
-        sleep(0.1)
+        #sleep(0.1)
+    # Note: Because in this video test it doesn't have situation turn left so i dont do this situation
 #_________________________________________________________________________________________________________________#
-#arduino = serial.Serial(port='COM5', baudrate=115200, timeout=0.1)
+#arduino = serial.Serial(port='COM1', baudrate=115200, timeout=0.1)
+arduino = serial.Serial(port='COM1', baudrate=57600)
 cap = cv2.VideoCapture("RoadCar.mp4")
 while True :
     _, frame = cap.read()
     edges_image = Xy_Ly_Anh_Mau(frame)
-    try:
-        cropped_image = Tao_Mat_Na(edges_image,left_point,right_point)
+    try:  
+        cropped_image = Tao_Mat_Na(edges_image,mid_point)
     except:
-        cropped_image = Tao_Mat_Na(edges_image,0,0)
+        cropped_image = Tao_Mat_Na(edges_image,0)
     lines = cv2.HoughLinesP(cropped_image, 6, np.pi/180, 100, np.array([]), 10, 200)
     average_lines = Phuong_Trinh_Duong_Thang(frame,lines)
-    line_image = Hien_Thi_Doan_Thang(frame, average_lines)
-    combo_image = cv2.addWeighted(frame,0.8,line_image,1,1)
     try:
         mid_point   = Giao_Diem(average_lines,600)[0]
         left_point  = Giao_Diem(average_lines,600)[1]
         right_point = Giao_Diem(average_lines,600)[2]
         print(left_point, mid_point, right_point)
+        thread = threading.Thread(target = Dieu_Khien,args=(mid_point,left_point,right_point,))
+        thread.start()
+        #thread.join()
     except:
-        mid_point   = 0
-        left_point  = 0
-        right_point = 0
-        print(left_point, mid_point, right_point)
-    thread = threading.Thread(target = Dieu_Khien,args=(mid_point,left_point,right_point,))
-    thread.start()
+        mid_point = 0
+    line_image = Hien_Thi_Doan_Thang(frame, average_lines)
+    combo_image = cv2.addWeighted(frame, 0.8, line_image, 1, 1)
     try:
-        cv2.line(combo_image, (left_point,650), (left_point,600), (0,128,255), 3)
-        cv2.line(combo_image, (right_point,650), (right_point,600), (102,0,102), 3)
+        cv2.line(combo_image, (left_point,650), (left_point - 50,600), (0,0,255), 3)
+        cv2.line(combo_image, (right_point,650), (right_point + 50,600), (0,0,255), 3)
         cv2.line(combo_image, (mid_point,650), (mid_point,600), (0,0,255), 3)
     except:
         cv2.line(frame, (0,0), (0,0), (0,0,0), 5)
@@ -136,6 +132,6 @@ while True :
     cv2.imshow("Frame",combo_image )
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
-#arduino.close()
+arduino.close()
 cap.release()
 cv2.destroyAllWindows()
