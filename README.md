@@ -20,5 +20,5 @@ STEP 4 : Run the source code and watch the result
 + Open Arduino IDE software and copy code in file "Control_steering wheel_and_motorDC.ino" to your Arduino IDE software
 + Connect to your computer and select board, here you'll chose Arduino Uno and click "upload" for loading into the microcontroller
 + Download video "RoadCar.mp4" and put in the same folder as the file "Detect_Line.py"
-+ Open flie "Detect_Line.py" run and see the result
++ Open file "Detect_Line.py" run and see the result
 
