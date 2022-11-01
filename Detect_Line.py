@@ -127,7 +127,7 @@ while True :
         cv2.line(combo_image, (right_point,650), (right_point + 70,600), (0,0,255), 3)
         cv2.line(combo_image, (mid_point,650), (mid_point,600), (0,0,255), 3)
     except:
-        cv2.line(frame, (0,0), (0,0), (0,0,0), 5)
+        sleep(0.001)
     width = 700 # keep original width
     height = 440
     dim = (width, height)
