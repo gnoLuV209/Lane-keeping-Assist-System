@@ -4,7 +4,7 @@ This is a personal project. Now i'll guide you how to create the model and run t
 
 STEP 1 : You need to prepare some electronic components
 + One Microcontroller Arduino Uno for receiving data from Small single-board computers Raspberry Pi or your personal computer and controlling L298 DC Motor Driver
-+ One L298 DC Motor Driver for control 2 motors at 2 wheels 
++ One L298 DC Motor Driver for control 4 motors at 2 wheels 
 + One 4 Wheel Drive Chassis Kit with Speed Encoder for the move
 + One Small single-board computers Raspberry Pi with Module Camera Mini Raspberry "or" your personal computer with computer's webcam for road marking recognition
 + One Motor Servo for steering wheel simulation
