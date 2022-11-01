@@ -51,14 +51,15 @@ void loop() {
   if(trangThaiNutNhan == 0){
     lcd.setCursor(0,0);
     lcd.print("Self-Driving:OFF");
-    lcd.setCursor(0,1);
-    lcd.print("            ");
     kqADC0 = analogRead(A0);
-    VTA = kqADC0/4;
-    dithang(VTA);
+    VTA = (uint32_t)kqADC0*100/1023;
+    dithang(kqADC0/4);
     kqADC1 = analogRead(A1);
-    ESP = map(kqADC1,0,1023,0,360);
+    ESP = map(kqADC1,0,1023,0,180);
     myServo.write(ESP);
+    lcd.setCursor(0,1);
+    lcd.print("VTA:");lcd.print(VTA);lcd.print("%");
+    lcd.print(" ESP:");hienThi1Byte(ESP);
   }
   if(trangThaiNutNhan == 1){
     lcd.setCursor(0,0);
@@ -68,17 +69,17 @@ void loop() {
     if( control_motor == 90 ){
       dithang(255);
       lcd.setCursor(0,1);
-      lcd.print("Go straight"); 
+      lcd.print("Go straight     "); 
     }
     else if( control_motor == 45 ){
       disangphai(150);
       lcd.setCursor(0,1);
-      lcd.print("Turn right");
+      lcd.print("Turn right      ");
     }
     else if( control_motor == 135 ){
       disangtrai(150);
       lcd.setCursor(0,1);
-      lcd.print("Turn left");
+      lcd.print("Turn left       ");
     }  
   }
   delay(10);
@@ -87,15 +88,15 @@ void loop() {
 // Điều khiển vô lăng đánh lái tự động mô phỏng bằng motor Servo
 uint8_t steering_angle(uint8_t data_from_arduino){
   uint8_t steering_angle;
-  if( data_from_arduino==90 ){
+  if( data_from_arduino == 90 ){
     steering_angle = 90;
     myServo.write(steering_angle);
   }
-  else if( data_from_arduino==45 ){
+  else if( data_from_arduino == 45 ){
     steering_angle = 45;
     myServo.write(steering_angle);
   }
-  else if( data_from_arduino==135 ){
+  else if( data_from_arduino == 135 ){
     steering_angle = 135;
     myServo.write(steering_angle);
   }
@@ -132,4 +133,9 @@ void resetdongco(){
   digitalWrite(lui_motor_1,0);
   digitalWrite(tien_motor_2,0);
   digitalWrite(lui_motor_2,0);
+}
+void hienThi1Byte(uint8_t dem){
+  if(dem<10){lcd.print(dem);lcd.print("*  ");}
+  else if(10<dem<100){lcd.print(dem);lcd.print("* ");}
+  else {lcd.print(dem);lcd.print("*");}
 }

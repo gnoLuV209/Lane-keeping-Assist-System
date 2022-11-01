@@ -84,11 +84,11 @@ def Tao_Mat_Na(canny_image,mid_point):
     return masked_image
 #################################################################################################################
 def Dieu_Khien(mid_point, left_point, right_point):
-    if (500 < mid_point < 950 and left_point > 370 and right_point < 1200) :
+    if (500 < mid_point < 950 and left_point > 360 and 840 < right_point < 1200) :
         print('Di Thang')
         arduino.write(b'90')
         sleep(0.001)
-    elif 160 < left_point < 330:
+    elif 160 < left_point < 395 and 830 < right_point < 860 :
         print('Re Phai',left_point)
         arduino.write(b'45')
         sleep(0.001)
@@ -123,13 +123,18 @@ while True :
     line_image = Hien_Thi_Doan_Thang(frame, average_lines)
     combo_image = cv2.addWeighted(frame, 0.8, line_image, 1, 1)
     try:
-        cv2.line(combo_image, (left_point,650), (left_point - 50,600), (0,0,255), 3)
-        cv2.line(combo_image, (right_point,650), (right_point + 50,600), (0,0,255), 3)
+        cv2.line(combo_image, (left_point,650), (left_point - 70,600), (0,0,255), 3)
+        cv2.line(combo_image, (right_point,650), (right_point + 70,600), (0,0,255), 3)
         cv2.line(combo_image, (mid_point,650), (mid_point,600), (0,0,255), 3)
     except:
         cv2.line(frame, (0,0), (0,0), (0,0,0), 5)
-    cv2.imshow("Crop Image",cropped_image)
-    cv2.imshow("Frame",combo_image )
+    width = 700 # keep original width
+    height = 440
+    dim = (width, height)
+    resizedCombo = cv2.resize(combo_image, dim, interpolation = cv2.INTER_AREA)
+    resizedCrop = cv2.resize(cropped_image, dim, interpolation = cv2.INTER_AREA)
+    cv2.imshow("Crop Image", resizedCrop)
+    cv2.imshow("Frame", resizedCombo )
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 arduino.close()
